@@ -1,0 +1,9 @@
+{
+  "name": "JARVIS 个人工作中枢",
+  "short_name": "JARVIS",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#101827"
+}

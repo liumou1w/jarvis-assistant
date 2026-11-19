@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<link rel="manifest" href="manifest.webmanifest">
+<title>JARVIS · 个人工作中枢</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#edf3ff;font:16px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+main{max-width:720px;margin:auto;padding:24px 16px 48px}.hero{padding:24px;border:1px solid #26354d;border-radius:22px;background:linear-gradient(145deg,#17263e,#101827)}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:2px}.muted{color:#9aabc4}.pill{display:inline-block;padding:5px 10px;border-radius:99px;background:#183d39;color:#7ce2c2;font-size:12px}
+section{margin-top:18px;padding:18px;border:1px solid #26354d;border-radius:18px;background:#111c2d}h2{font-size:18px;margin:0 0 12px}
+.task{padding:12px 0;border-bottom:1px solid #26354d}.task:last-child{border:0}.task b{display:block;margin-bottom:5px}
+button{border:0;border-radius:12px;padding:11px 14px;background:#5b8cff;color:white;font-weight:600;font-size:15px}
+input,textarea{width:100%;padding:12px;border:1px solid #34445e;border-radius:12px;background:#0b1423;color:#fff;font:inherit;margin:6px 0 10px}
+textarea{min-height:76px} .entry{padding:10px 0;border-bottom:1px solid #26354d;white-space:pre-wrap}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.secondary{background:#26354d}
+small{color:#91a3bd}
+</style>
+</head>
+<body><main>
+<div class="hero"><span class="pill">个人工作中枢 · 本地原型</span><h1>JARVIS</h1><div class="muted">你的个人 AI 助手控制台</div><p id="clock"></p><small>当前版本为本地网页原型，尚未连接 AI 服务或后台自动执行。</small></div>
+<section><h2>长期任务</h2>
+<div class="task"><b>赚钱机会研究</b><span class="muted">收集机会、核验规则与风险，未经确认不进行资金操作。</span></div>
+<div class="task"><b>抖音运营与 AI 短剧</b><span class="muted">选题、脚本、分镜、发布复盘。</span></div>
+<div class="task"><b>每日个人工作日报</b><span class="muted">整理进展、待办和下一步计划。</span></div>
+</section>
+<section><h2>任务队列</h2><input id="taskInput" placeholder="输入一项要推进的任务"><div class="actions"><button onclick="addTask()">添加任务</button><button class="secondary" onclick="exportData()">导出备份</button></div><div id="tasks"></div></section>
+<section><h2>工作记录</h2><textarea id="note" placeholder="记录今天的进展、想法或结果"></textarea><button onclick="saveNote()">保存记录</button><div id="notes"></div></section>
+<section><h2>重要操作审批</h2><p class="muted">涉及资金、账号绑定、对外发布等操作，应先由你确认。此处仅记录审批事项，不会执行外部操作。</p><input id="approvalInput" placeholder="写下需要你确认的事项"><button onclick="addApproval()">新增待确认事项</button><div id="approvals"></div></section>
+</main>
+<script>
+const get=k=>JSON.parse(localStorage.getItem(k)||"[]"), put=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+function render(){document.getElementById('tasks').innerHTML=get('tasks').map(x=>'<div class="entry">• '+esc(x)+'</div>').join('');document.getElementById('notes').innerHTML=get('notes').map(x=>'<div class="entry">'+esc(x)+'</div>').join('');document.getElementById('approvals').innerHTML=get('approvals').map(x=>'<div class="entry">待确认：'+esc(x)+'</div>').join('')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addTask(){let e=document.getElementById('taskInput');if(e.value.trim()){let a=get('tasks');a.push(e.value.trim());put('tasks',a);e.value='';render()}}
+function saveNote(){let e=document.getElementById('note');if(e.value.trim()){let a=get('notes');a.unshift(new Date().toLocaleString('zh-CN')+'\n'+e.value.trim());put('notes',a);e.value='';render()}}
+function addApproval(){let e=document.getElementById('approvalInput');if(e.value.trim()){let a=get('approvals');a.push(e.value.trim());put('approvals',a);e.value='';render()}}
+function exportData(){let data={tasks:get('tasks'),notes:get('notes'),approvals:get('approvals')};let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jarvis-backup.json';a.click();URL.revokeObjectURL(a.href)}
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})+'（北京时间）'}
+tick();setInterval(tick,1000);render();
+if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>
